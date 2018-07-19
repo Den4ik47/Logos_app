@@ -32,7 +32,7 @@ app.use(express.static('./client/dist/'));
 const authRoutes = require('./server/routes/auth');
 const project_route = require('./server/routes/project');
 app.use('/auth', authRoutes);
-app.use('/add', project_route);
+app.use('/project', project_route);
 // routes
 
 

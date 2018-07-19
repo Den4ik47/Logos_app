@@ -1,26 +1,12 @@
 const express = require('express');
 const validator = require('validator');
-const mysql=require('mysql');
 var bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 var session=require('express-session');
 const router = new express.Router();
-var connection = mysql.createConnection({
-  host     : '217.173.195.9',
-  user     : '119844',
-  password : '119844',
-  database:'119844'
-});
+var db = require('../config/database.js');
 
-connection.connect(function(err){
-  if(!err) {
-      console.log("Database is connected ... nn");
-} else {
-    console.log("Error connecting database ... nn");
-}
-
-});  
 //var db = require("./config.js");
 /**
  * Validate the sign up form
@@ -104,7 +90,7 @@ router.post('/signup', (req, res) => {
   }
 
 
-        connection.query("SELECT * FROM users WHERE email = ?",[req.body.email], function(err, rows) {
+  db.query("SELECT * FROM users WHERE email = ?",[req.body.email], function(err, rows) {
           if (err) {
            //command/query
             console.log("ERROR");
@@ -118,7 +104,7 @@ router.post('/signup', (req, res) => {
           }
           
           else {
-            connection.query("SELECT * FROM users WHERE username = ?",[req.body.name], function(err, rows) {
+            db.query("SELECT * FROM users WHERE username = ?",[req.body.name], function(err, rows) {
               if (err) {
                //command/query
                 console.log("ERROR");
@@ -146,7 +132,7 @@ var today = new Date();
     
               var insertQuery = "INSERT INTO users ( username, email, password, created, modified ) values (?,?,?,?,?)";
     
-              connection.query(insertQuery,[newUserMysql.username,newUserMysql.email, newUserMysql.password,newUserMysql.created,newUserMysql.modified],function(err, rows) {
+              db.query(insertQuery,[newUserMysql.username,newUserMysql.email, newUserMysql.password,newUserMysql.created,newUserMysql.modified],function(err, rows) {
               
                   return res.status(200).json({
                     success: true,
@@ -171,7 +157,7 @@ var today = new Date();
     }
   
   
-    connection.query("SELECT * FROM users WHERE email = ?",[req.body.email], function(err, rows){
+    db.query("SELECT * FROM users WHERE email = ?",[req.body.email], function(err, rows){
       if (err)
           return err;
       if (!rows.length) {
@@ -190,7 +176,19 @@ var today = new Date();
         message: 'Oops! Wrong password.',
     }); // create the loginMessage and save it to session as flashdata
       }
-req.session.username=rows[0].username;
+      const saltRounds = 10;
+const salt = bcrypt.genSaltSync(saltRounds);
+const userHash = bcrypt.hashSync(rows[0].username, salt);
+req.session.username=userHash;
+req.session.save(function(err) {
+  if(err){
+      var data = 'Error saving session';
+      res.json(data);
+  }else{
+    var data = 'Session saved successfully';
+      res.json(data);
+  }});
+console.log(req.session.username);
       // all is well, return successful user
       return res.json({
         success: true,

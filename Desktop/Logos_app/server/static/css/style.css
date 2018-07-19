@@ -50,13 +50,30 @@ a:hover {
 .nav a {
   margin: 0 8px;
 }
+.buttons{
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
 
+}
+.element{
+  margin: 50px;
+}
+.FloatingAction{
+  display: flex;
+  flex-direction:row;
+  align-items: baseline;
+  justify-content: center;
+  margin: 12px;
+}
 .container {
   margin: 0 auto;
   text-align: center;
   width: 700px;
 }
-
+.cards{
+  text-align: left;
+}
 .card-heading {
   padding: 16px;
 }
